@@ -1,0 +1,25 @@
+#include <vector>
+#include <queue>
+
+class Solution {
+public:
+    int maxTransactions(std::vector<int>& transactions) {
+        // Min-heap to track smallest transactions
+        std::priority_queue<int, std::vector<int>, std::greater<int>> minHeap;
+        long long currentSum = 0;
+
+        for (int amount : transactions) {
+            minHeap.push(amount);
+            currentSum += amount;
+
+            // If the sum goes negative, remove the smallest transaction
+            if (currentSum < 0) {
+                currentSum -= minHeap.top();
+                minHeap.pop();
+            }
+        }
+
+        // The size of the heap represents the maximum number of valid transactions
+        return static_cast<int>(minHeap.size());
+    }
+};
