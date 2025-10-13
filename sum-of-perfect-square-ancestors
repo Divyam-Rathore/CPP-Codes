@@ -1,0 +1,73 @@
+class Solution {
+public:
+    using ll = long long;
+
+    vector<vector<int>> adj;
+    vector<int> values;
+    ll totalPairs = 0;
+
+    // Function to remove square factors from a number
+    int removeSquareFactors(int num) {
+        int result = 1;
+
+        for (int i = 2; i * i <= num; ++i) {
+            int count = 0;
+            while (num % i == 0) {
+                num /= i;
+                ++count;
+            }
+            if (count % 2 == 1) {
+                result *= i;
+            }
+        }
+
+        if (num > 1) {
+            result *= num;
+        }
+
+        return result;
+    }
+
+    // Merge two frequency maps (smaller one into the larger one)
+    void mergeMaps(map<int, ll>& target, map<int, ll> source) {
+        if (target.size() < source.size()) {
+            swap(target, source);
+        }
+
+        for (const auto& [key, value] : source) {
+            target[key] += value;
+        }
+    }
+
+    // DFS traversal returning map of frequency of square-free values in subtree
+    map<int, ll> dfs(int node, int parent) {
+        map<int, ll> freqMap;
+
+        for (int neighbor : adj[node]) {
+            if (neighbor == parent) continue;
+            mergeMaps(freqMap, dfs(neighbor, node));
+        }
+
+        int squareFreeVal = removeSquareFactors(values[node]);
+        totalPairs += freqMap[squareFreeVal];
+        ++freqMap[squareFreeVal];
+
+        return freqMap;
+    }
+
+    // Main function to compute sum of pairs with same square-free representation
+    long long sumOfAncestors(int n, vector<vector<int>>& edges, vector<int>& nums) {
+        adj.assign(n, {});
+        values = nums;
+        totalPairs = 0;
+
+        for (const auto& edge : edges) {
+            int u = edge[0], v = edge[1];
+            adj[u].push_back(v);
+            adj[v].push_back(u);
+        }
+
+        dfs(0, -1);
+        return totalPairs;
+    }
+};
